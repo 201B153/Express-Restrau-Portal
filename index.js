@@ -1,18 +1,13 @@
 // index.js
 
-
-/**
- * Passport Configuration
- */
-
- const strategy = new Auth0Strategy(
+const strategy = new Auth0Strategy(
   {
     domain: process.env.AUTH0_DOMAIN,
     clientID: process.env.AUTH0_CLIENT_ID,
     clientSecret: process.env.AUTH0_CLIENT_SECRET,
-    callbackURL: process.env.AUTH0_CALLBACK_URL
+    callbackURL: process.env.AUTH0_CALLBACK_URL,
   },
-  function(accessToken, refreshToken, extraParams, profile, done) {
+  function (accessToken, refreshToken, extraParams, profile, done) {
     /**
      * Access tokens are used to authorize users to an API
      * (resource server)
@@ -25,28 +20,27 @@
   }
 );
 
-
 /**
  * Required External Modules
  */
 
- const express = require("express");
- const path = require("path");
- 
- const expressSession = require("express-session");
- const passport = require("passport");
- const Auth0Strategy = require("passport-auth0");
- 
- require("dotenv").config();
- 
- const authRouter = require("./auth");
+const express = require('express');
+const path = require('path');
+
+const expressSession = require('express-session');
+const passport = require('passport');
+const Auth0Strategy = require('passport-auth0');
+
+require('dotenv').config();
+
+const authRouter = require('./auth');
 
 /**
  * App Variables
  */
 
 const app = express();
-const port = process.env.PORT || "8000";
+const port = process.env.PORT || '8000';
 
 /**
  * Session Configuration
@@ -56,17 +50,17 @@ const session = {
   secret: process.env.SESSION_SECRET,
   cookie: {},
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
 };
 
-if (app.get("env") === "production") {
+if (app.get('env') === 'production') {
   // Serve secure cookies, requires HTTPS
   session.cookie.secure = true;
 }
 
-if (app.get("env") === "production") {
+if (app.get('env') === 'production') {
   // Serve secure cookies, requires HTTPS
-  session.cookie.secure = true; 
+  session.cookie.secure = true;
 }
 
 /**
@@ -77,15 +71,15 @@ if (app.get("env") === "production") {
  *  App Configuration
  */
 
- app.set("views", path.join(__dirname, "views"));
- app.set("view engine", "pug");
- app.use(express.static(path.join(__dirname, "public")));
- 
- app.use(expressSession(session));
- 
- passport.use(strategy);
- app.use(passport.initialize());
- app.use(passport.session());
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(expressSession(session));
+
+passport.use(strategy);
+app.use(passport.initialize());
+app.use(passport.session());
 
 passport.serializeUser((user, done) => {
   done(null, user);
@@ -102,30 +96,30 @@ app.use((req, res, next) => {
 });
 
 // Router mounting
-app.use("/", authRouter);
+app.use('/', authRouter);
 
 /**
  * Routes Definitions
  */
 
- const secured = (req, res, next) => {
+const secured = (req, res, next) => {
   if (req.user) {
     return next();
   }
   req.session.returnTo = req.originalUrl;
-  res.redirect("/login");
+  res.redirect('/login');
 };
 
 // Defined routes
-app.get("/", (req, res) => {
-   res.render("index", { title: "Home" });
- });
+app.get('/', (req, res) => {
+  res.render('index', { title: 'Home' });
+});
 
- app.get("/user", secured, (req, res, next) => {
+app.get('/user', secured, (req, res, next) => {
   const { _raw, _json, ...userProfile } = req.user;
-  res.render("user", {
-    title: "Profile",
-    userProfile: userProfile
+  res.render('user', {
+    title: 'Profile',
+    userProfile: userProfile,
   });
 });
 
@@ -134,5 +128,5 @@ app.get("/", (req, res) => {
  */
 
 app.listen(port, () => {
-   console.log(`Listening to requests on http://localhost:${port}`);
- });
+  console.log(`Listening to requests on http://localhost:${port}`);
+});
